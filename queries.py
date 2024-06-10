@@ -48,6 +48,8 @@ def add_job(id: int, response):
     if session.query(Job.admin_id, Job.role, Job.min_experience).filter(
             and_(Job.admin_id == id, Job.role == response.role, Job.min_experience == response.min_experience)).first():
         raise Exception
+    if session.query(User.status).filter(User.id==id).first()[0]=="user":
+        raise RuntimeError
     job = Job(role=response.role, company=response.company, location=response.location,
               responsibilities=response.responsibilities,
               requirements=response.requirements, website=response.website, salary=response.salary,
@@ -66,25 +68,25 @@ def get_job(id):
     return session.query(Job).filter(Job.id == id).first()
 
 
-def delete_job(id):
-    job = session.query(Job).filter(Job.id == id)
+def delete_job(id,job_id):
+    if session.query(User.status).filter(User.id==id).first()[0]=="user":
+        raise RuntimeError
+    job = session.query(Job).filter(and_(Job.id == job_id,Job.admin_id==id))
     if not job.first():
         raise Exception
-    session.query(JobApplication).filter(JobApplication.job_id == id).delete()
+    session.query(JobApplication).filter(JobApplication.job_id == job_id).delete()
     job.delete()
     session.commit()
 
 
 def apply(user_id, job_id):
     try:
-        if session.query(User.status).filter(User.id == 1).first()[0]=="admin":
+        if session.query(User.status).filter(User.id == user_id).first()[0]=="admin":
             raise Exception
         application = JobApplication(job_id=job_id, user_id=user_id)
         session.add(application)
         session.commit()
     except:
-        print('exception')
-        session.refresh(User)
         session.close()
         raise Exception
 
@@ -106,12 +108,17 @@ def my_applications(id: int):
 
 
 def received_applications(id: int, job_id: int):
+    if session.query(User.status).filter(User.id==id).first()[0]=="user":
+        raise RuntimeError
+    if session.query(Job.admin_id).filter(Job.id==job_id).first()[0]!=id:
+        raise Exception
     applicants = session.query(JobApplication).filter(JobApplication.job_id == job_id).all()
-    # return applicants
     return [session.query(User).filter(User.id == applicant.user_id).first() for applicant in applicants]
 
 
 def my_postings(id: int):
+    if session.query(User.status).filter(User.id==id).first()[0]=="user":
+        raise RuntimeError
     return session.query(Job).filter(Job.admin_id == id).all()
 
 
@@ -126,5 +133,3 @@ def check_crentials(request):
     if not user:
         raise Exception
     return user.full_name
-
-# print(session.query(User.status).filter(User.id==2).first()[0])
