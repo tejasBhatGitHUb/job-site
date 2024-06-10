@@ -33,15 +33,6 @@ def login(request: schemas.Login):
         return "Wrong password"
 
 
-@app.get('/user/{id}', response_model=schemas.ShowUser, tags=["User"])
-def show_user(id: int):
-    try:
-        user = queries.get_user(id)
-        return user
-    except:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-
-
 @app.get('/user/{id}/profile', response_model=schemas.ShowUser, tags=["User"])
 def show_profile(id: int):
     try:
@@ -126,24 +117,38 @@ def post_job(id: int, response: schemas.PostJob):
     try:
         print(queries.add_job(id, response))
         return response
+    except RuntimeError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="You are not allowed to post a job opening")
     except:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Job already exists.")
 
 
 @app.get('/admin/{id}/posted', response_model=List[schemas.ShowJob], tags=["Admin"])
 def posted_jobs(id: int):
-    return queries.my_postings(id)
+    try:
+        return queries.my_postings(id)
+    except RuntimeError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Not allowed")
 
 
 @app.get('/admin/{id}/posted/{job_id}/applications', response_model=List[schemas.ShowSignup], tags=["Admin"])
 def received_applications(id: int, job_id: int):
-    return queries.received_applications(id, job_id)
+    try:
+        return queries.received_applications(id, job_id)
+    except :
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Method not allowed")
+
 
 
 @app.delete('/admin/{id}/posted/delete/{job_id}', tags=["Admin"])
-def delete_job(job_id: int):
-    queries.delete_job(job_id)
-    return f"Deleted job with id {job_id}"
+def delete_job(id:int,job_id: int):
+    try:
+        queries.delete_job(id,job_id)
+        return f"Deleted job with id {job_id}"
+    except RuntimeError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Your not allowed to delete the job openings")
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="something went wrong")
 
 
 if __name__ == "__main__":
