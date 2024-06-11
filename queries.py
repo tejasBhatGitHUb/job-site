@@ -4,13 +4,13 @@ from database_models import Job, JobApplication, User, initialize_db
 session = initialize_db()
 
 
-def add_user(response):
-    if session.query(User.email).filter(User.email == response.email).first():
+def add_user(request):
+    if session.query(User.email).filter(User.email == request.email).first():
         raise Exception
-    user = User(full_name=response.full_name, highest_education=response.highest_education,
-                email=response.email, years_of_experience=response.years_of_experience,
-                skills=response.skills, linkedin_url=response.linkedin_url,
-                resume_url=response.resume_url, password=response.password, status=response.status)
+    user = User(full_name=request.full_name, highest_education=request.highest_education,
+                email=request.email, years_of_experience=request.years_of_experience,
+                skills=request.skills, linkedin_url=request.linkedin_url,
+                resume_url=request.resume_url, password=request.password, status=request.status)
     session.add(user)
     session.commit()
 
@@ -33,28 +33,28 @@ def get_user(id):
     return user
 
 
-def update_user_profile(id, response):
+def update_user_profile(id, request):
     user = session.query(User).filter(User.id == id).first()
-    user.highest_education = response.highest_education
-    user.years_of_experience = response.years_of_experience
-    user.skills = response.skills
-    user.linkedin_url = response.linkedin_url
-    user.resume_url = response.resume_url
-    user.password = response.password
+    user.highest_education = request.highest_education
+    user.years_of_experience = request.years_of_experience
+    user.skills = request.skills
+    user.linkedin_url = request.linkedin_url
+    user.resume_url = request.resume_url
+    user.password = request.password
     session.commit()
 
 
-def add_job(id: int, response):
+def add_job(id: int, request):
     if session.query(Job.admin_id, Job.role, Job.min_experience).filter(
-            and_(Job.admin_id == id, Job.role == response.role, Job.min_experience == response.min_experience)).first():
+            and_(Job.admin_id == id, Job.role == request.role, Job.min_experience == request.min_experience)).first():
         raise Exception
     if session.query(User.status).filter(User.id==id).first()[0]=="user":
         raise RuntimeError
-    job = Job(role=response.role, company=response.company, location=response.location,
-              responsibilities=response.responsibilities,
-              requirements=response.requirements, website=response.website, salary=response.salary,
-              currency=response.currency,
-              min_experience=response.min_experience, email=response.email, admin_id=id)
+    job = Job(role=request.role, company=request.company, location=request.location,
+              responsibilities=request.responsibilities,
+              requirements=request.requirements, website=request.website, salary=request.salary,
+              currency=request.currency,
+              min_experience=request.min_experience, email=request.email, admin_id=id)
     session.add(job)
     session.commit()
 
