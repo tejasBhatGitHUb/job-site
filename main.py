@@ -40,14 +40,14 @@ def show_profile(id: int):
         return user
     except:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail="We encountered an issue while serving your response pleases try again")
+                            detail="We encountered an issue while serving your request pleases try again")
 
 
 @app.patch('/user/{id}/profile/update', response_model=schemas.UpdateUser, tags=["User"])
-def update_profile(id: int, response: schemas.UpdateUser):
+def update_profile(id: int, request: schemas.UpdateUser):
     try:
-        queries.update_user_profile(id, response)
-        return response
+        queries.update_user_profile(id, request)
+        return request
     except:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Something went wrong")
 
@@ -69,11 +69,13 @@ def show_my_applications(id: int):
 
 @app.delete('/user/{id}/profile/applications/delete/{job_id}', tags=["User"])
 def delete_my_application(id: int, job_id: int):
-    # try:
-    queries.delete_application(id, job_id)
-    return f"Deleted your application for job id {job_id} "
-    # except:
-    #     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Something went wrong")
+    try:
+        queries.delete_application(id, job_id)
+        return f"Deleted your application for job id {job_id} "
+    except RuntimeError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="")
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Something went wrong")
 
 
 @app.get('/user/{id}/jobs', response_model=List[schemas.ShowJobs], tags=["User"])
@@ -82,7 +84,7 @@ def show_all_jobs():
         return queries.get_all_jobs()
     except:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail="We encountered an issue while serving your response pleases try again")
+                            detail="We encountered an issue while serving your request pleases try again")
 
 
 @app.get('/user/{id}/jobs/{job_id}', response_model=schemas.ShowJob, tags=["User"])
@@ -131,7 +133,7 @@ def posted_jobs(id: int):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Not allowed")
 
 
-@app.get('/admin/{id}/posted/{job_id}/applications', response_model=List[schemas.ShowSignup], tags=["Admin"])
+@app.get('/admin/{id}/posted/{job_id}/applications', response_model=List[schemas.ReceivedApplications], tags=["Admin"])
 def received_applications(id: int, job_id: int):
     try:
         return queries.received_applications(id, job_id)
