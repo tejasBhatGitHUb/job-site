@@ -89,3 +89,5 @@ class ShowPostedJob(PostJob):
 
 class ReceivedApplications(ShowSignup):
     email:str
+class ShowAllUsers(PostJob):
+    id: int
