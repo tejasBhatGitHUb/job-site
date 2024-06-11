@@ -33,6 +33,10 @@ def login(request: schemas.Login):
         return "Wrong password"
 
 
+@app.get('/user',response_model=List[schemas.ReceivedApplications],tags=["User"])
+def get_all_users():
+    return queries.get_users()
+
 @app.get('/user/{id}/profile', response_model=schemas.ShowUser, tags=["User"])
 def show_profile(id: int):
     try:
