@@ -31,7 +31,9 @@ def get_user(id):
     if not user:
         return Exception
     return user
-
+    
+def get_users():
+    return session.query(User).all()
 
 def update_user_profile(id, request):
     user = session.query(User).filter(User.id == id).first()
