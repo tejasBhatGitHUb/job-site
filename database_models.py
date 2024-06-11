@@ -84,7 +84,7 @@ class Job(Base):
             return f'''{self.id}, {self.admin_id},{self.role}, {self.company}, {self.location}, {self.responsibilities}, {self.requirements}, {self.website}, {self.salary}',
             {self.currency},{self.min_experience},{self.email}'''
 def initialize_db():
-    engine = create_engine(getenv("connection_string"))
+    engine = create_engine('sqlite:///:memory:',echo=True)
     Base.metadata.create_all(bind=engine)
     Session = sessionmaker(bind=engine)
     session = Session()
