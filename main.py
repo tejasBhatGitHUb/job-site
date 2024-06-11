@@ -33,7 +33,7 @@ def login(request: schemas.Login):
         return "Wrong password"
 
 
-@app.get('/user',response_model=List[schemas.ReceivedApplications],tags=["User"])
+@app.get('/user',response_model=List[schemas.ShowAllUsers],tags=["User"])
 def get_all_users():
     return queries.get_users()
 
