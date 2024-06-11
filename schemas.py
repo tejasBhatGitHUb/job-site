@@ -87,7 +87,11 @@ class PostJob(BaseModel):
 class ShowPostedJob(PostJob):
     pass
 
+
 class ReceivedApplications(ShowSignup):
-    email:str
-class ShowAllUsers(PostJob):
+    email: str
+
+
+class ShowAllUsers(ShowSignup):
+    email: str
     id: int
