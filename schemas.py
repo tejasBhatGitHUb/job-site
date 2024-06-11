@@ -95,3 +95,4 @@ class ReceivedApplications(ShowSignup):
 class ShowAllUsers(ShowSignup):
     email: str
     id: int
+    status:str
