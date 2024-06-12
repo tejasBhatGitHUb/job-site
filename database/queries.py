@@ -1,8 +1,8 @@
 from sqlalchemy import and_
 from .initialize_database_models import initialize_db
-from models.user_model import User
-from models.job_model import Job
-import models.job_application_model
+from .models.user_model import User
+from .models.job_model import Job
+from .models.job_application_model import JobApplication
 
 session = initialize_db()
 
@@ -24,8 +24,8 @@ def delete_user(id: int):
         raise Exception
     if user.first().status == "admin":
         raise RuntimeError
-    session.query(models.job_application_model.JobApplication).filter(
-        models.job_application_model.JobApplication.user_id == id).delete()
+    session.query(JobApplication).filter(
+        JobApplication.user_id == id).delete()
     user.delete()
     session.commit()
 
@@ -82,8 +82,8 @@ def delete_job(id, job_id):
     job = session.query(Job).filter(and_(Job.id == job_id, Job.admin_id == id))
     if not job.first():
         raise Exception
-    session.query(models.job_application_model.JobApplication).filter(
-        models.job_application_model.JobApplication.job_id == job_id).delete()
+    session.query(JobApplication).filter(
+        JobApplication.job_id == job_id).delete()
     job.delete()
     session.commit()
 
@@ -92,7 +92,7 @@ def apply(user_id, job_id):
     try:
         if session.query(User.status).filter(User.id == user_id).first()[0] == "admin":
             raise Exception
-        application = models.job_application_model.JobApplication(job_id=job_id, user_id=user_id)
+        application = JobApplication(job_id=job_id, user_id=user_id)
         session.add(application)
         session.commit()
     except:
@@ -101,9 +101,8 @@ def apply(user_id, job_id):
 
 
 def delete_application(user_id, job_id):
-    application = session.query(models.job_application_model.JobApplication).filter(
-        and_(models.job_application_model.JobApplication.user_id == user_id,
-             models.job_application_model.JobApplication.job_id == job_id))
+    application = session.query(JobApplication).filter(
+        and_(JobApplication.user_id == user_id, JobApplication.job_id == job_id))
     if not application.first():
         raise Exception
     application.delete()
@@ -120,8 +119,7 @@ def received_applications(id: int, job_id: int):
         raise RuntimeError
     if session.query(Job.admin_id).filter(Job.id == job_id).first()[0] != id:
         raise Exception
-    applicants = session.query(models.job_application_model.JobApplication).filter(
-        models.job_application_model.JobApplication.job_id == job_id).all()
+    applicants = session.query(JobApplication).filter(JobApplication.job_id == job_id).all()
     return [session.query(User).filter(User.id == applicant.user_id).first() for applicant in applicants]
 
 

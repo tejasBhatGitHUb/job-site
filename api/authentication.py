@@ -8,7 +8,7 @@ router = APIRouter(
 
 
 @router.post('/signup', response_model=schemas.ShowSignup)
-def signup(request: schemas.Signup = Path(..., description="New user then Signup")):
+def signup(request: schemas.Signup):
     try:
         queries.add_user(request)
         return request
