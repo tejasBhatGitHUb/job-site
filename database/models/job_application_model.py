@@ -1,9 +1,10 @@
 from dotenv import load_dotenv
-from sqlalchemy import Column, ForeignKey, INTEGER,DateTime, func
+from sqlalchemy import Column, ForeignKey, INTEGER, DateTime, func
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 load_dotenv()
+
 
 class JobApplication(Base):
     __tablename__ = "job_applications"

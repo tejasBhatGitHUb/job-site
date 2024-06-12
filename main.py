@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
-from api import user,admin,authentication
+from api import user, admin, authentication
 
 app = FastAPI(title="MY JOBS")
 
