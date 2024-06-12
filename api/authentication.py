@@ -19,7 +19,7 @@ def signup(request: schemas.Signup):
 @router.post('/login')
 def login(request: schemas.Login):
     try:
-        name = queries.check_crentials(request)
+        name = queries.check_credentials(request)
         return f"Welcome back {name} "
     except NameError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No user Found ")

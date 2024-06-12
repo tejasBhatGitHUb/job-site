@@ -1,5 +1,9 @@
 from sqlalchemy import and_
-from database.database_models import Job, JobApplication, User, initialize_db
+from .initialize_database_models import initialize_db
+from models.user_model import User
+from models.job_model import Job
+import models.job_application_model
+
 session = initialize_db()
 
 
@@ -18,9 +22,10 @@ def delete_user(id: int):
     user = session.query(User).filter(User.id == id)
     if not user.first():
         raise Exception
-    if user.first().status=="admin":
+    if user.first().status == "admin":
         raise RuntimeError
-    session.query(JobApplication).filter(JobApplication.user_id == id).delete()
+    session.query(models.job_application_model.JobApplication).filter(
+        models.job_application_model.JobApplication.user_id == id).delete()
     user.delete()
     session.commit()
 
@@ -30,9 +35,11 @@ def get_user(id):
     if not user:
         return Exception
     return user
-    
+
+
 def get_users():
     return session.query(User).all()
+
 
 def update_user_profile(id, request):
     user = session.query(User).filter(User.id == id).first()
@@ -49,7 +56,7 @@ def add_job(id: int, request):
     if session.query(Job.admin_id, Job.role, Job.min_experience).filter(
             and_(Job.admin_id == id, Job.role == request.role, Job.min_experience == request.min_experience)).first():
         raise Exception
-    if session.query(User.status).filter(User.id==id).first()[0]=="user":
+    if session.query(User.status).filter(User.id == id).first()[0] == "user":
         raise RuntimeError
     job = Job(role=request.role, company=request.company, location=request.location,
               responsibilities=request.responsibilities,
@@ -69,22 +76,23 @@ def get_job(id):
     return session.query(Job).filter(Job.id == id).first()
 
 
-def delete_job(id,job_id):
-    if session.query(User.status).filter(User.id==id).first()[0]=="user":
+def delete_job(id, job_id):
+    if session.query(User.status).filter(User.id == id).first()[0] == "user":
         raise RuntimeError
-    job = session.query(Job).filter(and_(Job.id == job_id,Job.admin_id==id))
+    job = session.query(Job).filter(and_(Job.id == job_id, Job.admin_id == id))
     if not job.first():
         raise Exception
-    session.query(JobApplication).filter(JobApplication.job_id == job_id).delete()
+    session.query(models.job_application_model.JobApplication).filter(
+        models.job_application_model.JobApplication.job_id == job_id).delete()
     job.delete()
     session.commit()
 
 
 def apply(user_id, job_id):
     try:
-        if session.query(User.status).filter(User.id == user_id).first()[0]=="admin":
+        if session.query(User.status).filter(User.id == user_id).first()[0] == "admin":
             raise Exception
-        application = JobApplication(job_id=job_id, user_id=user_id)
+        application = models.job_application_model.JobApplication(job_id=job_id, user_id=user_id)
         session.add(application)
         session.commit()
     except:
@@ -92,11 +100,10 @@ def apply(user_id, job_id):
         raise Exception
 
 
-
-
 def delete_application(user_id, job_id):
-    application = session.query(JobApplication).filter(
-        and_(JobApplication.user_id == user_id, JobApplication.job_id == job_id))
+    application = session.query(models.job_application_model.JobApplication).filter(
+        and_(models.job_application_model.JobApplication.user_id == user_id,
+             models.job_application_model.JobApplication.job_id == job_id))
     if not application.first():
         raise Exception
     application.delete()
@@ -109,21 +116,22 @@ def my_applications(id: int):
 
 
 def received_applications(id: int, job_id: int):
-    if session.query(User.status).filter(User.id==id).first()[0]=="user":
+    if session.query(User.status).filter(User.id == id).first()[0] == "user":
         raise RuntimeError
-    if session.query(Job.admin_id).filter(Job.id==job_id).first()[0]!=id:
+    if session.query(Job.admin_id).filter(Job.id == job_id).first()[0] != id:
         raise Exception
-    applicants = session.query(JobApplication).filter(JobApplication.job_id == job_id).all()
+    applicants = session.query(models.job_application_model.JobApplication).filter(
+        models.job_application_model.JobApplication.job_id == job_id).all()
     return [session.query(User).filter(User.id == applicant.user_id).first() for applicant in applicants]
 
 
 def my_postings(id: int):
-    if session.query(User.status).filter(User.id==id).first()[0]=="user":
+    if session.query(User.status).filter(User.id == id).first()[0] == "user":
         raise RuntimeError
     return session.query(Job).filter(Job.admin_id == id).all()
 
 
-def check_crentials(request):
+def check_credentials(request):
     has_user = session.query(User).filter(User.email == request.email).first()
     print(has_user)
     if not has_user:
