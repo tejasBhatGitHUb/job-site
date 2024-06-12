@@ -1,5 +1,4 @@
 import os
-from os import getenv
 from dotenv import load_dotenv
 from sqlalchemy import Column, ForeignKey, INTEGER, VARCHAR, FLOAT, DateTime, func, create_engine
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
@@ -21,7 +20,7 @@ class JobApplication(Base):
 class User(Base):
     __tablename__ = 'users'
     id = Column('id', INTEGER, autoincrement=True, primary_key=True)
-    status = Column("status", VARCHAR(5),default="user")
+    status = Column("status", VARCHAR(5), default="user")
     full_name = Column('full_name', VARCHAR(100))
     email = Column("email", VARCHAR(100))
     highest_education = Column('highest_education', VARCHAR(50))
@@ -32,11 +31,10 @@ class User(Base):
     password = Column('password', VARCHAR(100))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-
-    def __init__(self, full_name,status,email, highest_education, years_of_experience, skills, linkedin_url,
+    def __init__(self, full_name, status, email, highest_education, years_of_experience, skills, linkedin_url,
                  resume_url, password):
         self.full_name = full_name
-        self.status=status
+        self.status = status
         self.email = email
         self.highest_education = highest_education
         self.years_of_experience = years_of_experience
@@ -52,7 +50,7 @@ class User(Base):
 class Job(Base):
     __tablename__ = "jobs"
     id = Column('id', INTEGER, autoincrement=True, primary_key=True)
-    admin_id=Column('admin_id', INTEGER)
+    admin_id = Column('admin_id', INTEGER)
     role = Column('role', VARCHAR(100))
     company = Column('company', VARCHAR(100))
     location = Column('location', VARCHAR(100))
@@ -65,11 +63,10 @@ class Job(Base):
     email = Column('email', VARCHAR(50))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-
-    def __init__(self,admin_id, role, company, location, responsibilities, requirements, website, salary, currency,
+    def __init__(self, admin_id, role, company, location, responsibilities, requirements, website, salary, currency,
                  min_experience,
                  email):
-        self.admin_id=admin_id
+        self.admin_id = admin_id
         self.role = role
         self.company = company
         self.location = location
@@ -84,6 +81,8 @@ class Job(Base):
         def __repr__(self):
             return f'''{self.id}, {self.admin_id},{self.role}, {self.company}, {self.location}, {self.responsibilities}, {self.requirements}, {self.website}, {self.salary}',
             {self.currency},{self.min_experience},{self.email}'''
+
+
 def initialize_db():
     engine = create_engine(os.getenv("connection_string"))
     Base.metadata.create_all(bind=engine)

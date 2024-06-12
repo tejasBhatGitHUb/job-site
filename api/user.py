@@ -4,7 +4,7 @@ from database import queries
 from fastapi import APIRouter, HTTPException, status, Path
 
 router = APIRouter(
-tags=["User"]
+    tags=["User"]
 )
 
 
