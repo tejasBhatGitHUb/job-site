@@ -10,7 +10,7 @@ app = FastAPI()
 
 @app.get('/', tags=["Index"])
 def index():
-    return "WELCOME!!!"
+    return {"message":"WELCOME!!!"}
 
 
 @app.post('/signup', response_model=schemas.ShowSignup, tags=["Authentication"])
